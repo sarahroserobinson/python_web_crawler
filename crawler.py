@@ -8,5 +8,9 @@ res = requests.get(url)
 soup = BeautifulSoup(res.text, "html.parser")
 for link in soup.findAll('a'):
     href = link.get("href")
-    if href and href.startswith("https"):
-        print(href)
+    if href.startswith("http"):
+        print(f"Absolute: {href}")
+    else:
+        print(f"Relative: {href}")
+    
+
