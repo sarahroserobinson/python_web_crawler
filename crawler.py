@@ -16,7 +16,7 @@ def check_links(robot_url, url):
     rp = RobotFileParser()
     rp.set_url(robot_url)
     rp.read()
-    visited_links = set()
+    visited_links = []
     urls_to_visit = [url]
     while len(urls_to_visit) and len(visited_links) < 10:
         current_url = urls_to_visit.pop(0)
@@ -29,11 +29,13 @@ def check_links(robot_url, url):
             continue
 
         print(f"Visiting: {current_url}")
-        visited_links.add(current_url)
 
         try:
             res = requests.get(current_url)
             soup = BeautifulSoup(res.text, "html.parser")
+
+            title = soup.find('title')
+            visited_links.append((current_url, title.get_text))
 
             for url in soup.findAll('a'):
                 href = url.get("href")
@@ -41,13 +43,14 @@ def check_links(robot_url, url):
                     full_url = urljoin(current_url, href)
                     if full_url not in visited_links and full_url not in urls_to_visit:
                         urls_to_visit.append(full_url)
+                        
 
         except Exception as e:
             print(f"Error fetching {current_url}: {e}")
     
     print("\nCrawler job complete. All links that were visited:")
-    for link in visited_links:
-        print(link)
+    for link, title in visited_links:
+        print(f"Visited URL: {link} \nTitle: {title}")
     
     return visited_links
 
