@@ -21,7 +21,13 @@ def check_links(robot_url, url):
     while len(urls_to_visit) and len(visited_links) < 10:
         current_url = urls_to_visit.pop(0)
 
-        if current_url in visited_links:
+        flag = False 
+        for link, title in visited_links:
+            if link == current_url:
+                flag = True
+                break
+        
+        if flag:
             continue
 
         if not ask_robots_permission(rp, current_url):
@@ -35,7 +41,8 @@ def check_links(robot_url, url):
             soup = BeautifulSoup(res.text, "html.parser")
 
             title = soup.find('title')
-            visited_links.append((current_url, title.get_text))
+            title_text = title.get_text()
+            visited_links.append((current_url, title_text))
 
             for url in soup.findAll('a'):
                 href = url.get("href")
