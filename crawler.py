@@ -41,7 +41,11 @@ def check_links(robot_url, url):
             soup = BeautifulSoup(res.text, "html.parser")
 
             title = soup.find('title')
-            title_text = title.get_text()
+            title_text = ""
+            if title:
+                title_text = title.get_text() 
+            else: 
+                title_text = "No title"
             visited_links.append((current_url, title_text))
 
             for url in soup.findAll('a'):
