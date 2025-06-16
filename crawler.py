@@ -7,7 +7,6 @@ from urllib.robotparser import RobotFileParser
 def crawl(robot_url, url_to_crawl, max_depth):
     return check_links(robot_url, url_to_crawl, max_depth)
 
-
 def ask_robots_permission(rp, url_to_crawl):
     return rp.can_fetch("*", url_to_crawl)
             
@@ -19,6 +18,10 @@ def get_title(soup):
     else: 
         title_text = "No title"
     return title_text 
+
+
+def check_if_already_visited(current_url, visited_links):
+    return any(link == current_url for link in visited_links)
 
 def check_links(robot_url, url, max_depth):
     rp = RobotFileParser()
@@ -32,13 +35,7 @@ def check_links(robot_url, url, max_depth):
         if depth > max_depth:
             break
         
-        flag = False 
-        for link, title in visited_links:
-            if link == current_url:
-                flag = True
-                break
-        
-        if flag:
+        if check_if_already_visited(current_url, visited_links):
             continue
 
         if not ask_robots_permission(rp, current_url):
