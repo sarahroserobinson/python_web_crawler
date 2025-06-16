@@ -23,6 +23,13 @@ def get_title(soup):
 def check_if_already_visited(current_url, visited_links):
     return any(link == current_url for link in visited_links)
 
+def extract_links(soup, current_url):
+    for url in soup.findAll('a'):
+        href = url.get("href")
+        if href and not href.startswith(("mailto:", "javascript:", "#")):
+            full_url = urljoin(current_url, href)
+            return full_url
+
 def check_links(robot_url, url, max_depth):
     rp = RobotFileParser()
     rp.set_url(robot_url)
@@ -51,12 +58,9 @@ def check_links(robot_url, url, max_depth):
             title_text = get_title(soup)
             visited_links.append((current_url, title_text))
 
-            for url in soup.findAll('a'):
-                href = url.get("href")
-                if href and not href.startswith(("mailto:", "javascript:", "#")):
-                    full_url = urljoin(current_url, href)
-                    if full_url not in visited_links and full_url not in urls_to_visit:
-                        urls_to_visit.append((full_url, depth + 1))
+            full_url = extract_links(soup, current_url)
+            if full_url not in visited_links and full_url not in urls_to_visit:
+                urls_to_visit.append((full_url, depth + 1))
                         
 
         except Exception as e:
