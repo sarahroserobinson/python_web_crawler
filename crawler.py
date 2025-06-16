@@ -4,23 +4,26 @@ from urllib.parse import urljoin
 from urllib.robotparser import RobotFileParser
 
 
-def crawl(robot_url, url_to_crawl):
-    return check_links(robot_url, url_to_crawl)
+def crawl(robot_url, url_to_crawl, max_depth):
+    return check_links(robot_url, url_to_crawl, max_depth)
 
 
 def ask_robots_permission(rp, url_to_crawl):
     return rp.can_fetch("*", url_to_crawl)
             
 
-def check_links(robot_url, url):
+def check_links(robot_url, url, max_depth):
     rp = RobotFileParser()
     rp.set_url(robot_url)
     rp.read()
     visited_links = []
-    urls_to_visit = [url]
+    urls_to_visit = [(url, 0)]
     while len(urls_to_visit) and len(visited_links) < 10:
-        current_url = urls_to_visit.pop(0)
+        current_url, depth = urls_to_visit.pop(0)
 
+        if depth > max_depth:
+            break
+        
         flag = False 
         for link, title in visited_links:
             if link == current_url:
@@ -53,7 +56,7 @@ def check_links(robot_url, url):
                 if href and not href.startswith(("mailto:", "javascript:", "#")):
                     full_url = urljoin(current_url, href)
                     if full_url not in visited_links and full_url not in urls_to_visit:
-                        urls_to_visit.append(full_url)
+                        urls_to_visit.append((full_url, depth + 1))
                         
 
         except Exception as e:
@@ -65,7 +68,7 @@ def check_links(robot_url, url):
     
     return visited_links
 
-print(crawl(robot_url="https://developer.mozilla.org/robots.txt", url_to_crawl="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a"))
+print(crawl(robot_url="https://developer.mozilla.org/robots.txt", url_to_crawl="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a", max_depth=3))
 
 
         
