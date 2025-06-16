@@ -11,6 +11,14 @@ def crawl(robot_url, url_to_crawl, max_depth):
 def ask_robots_permission(rp, url_to_crawl):
     return rp.can_fetch("*", url_to_crawl)
             
+def get_title(soup):
+    title = soup.find('title')
+    title_text = ""
+    if title:
+        title_text = title.get_text() 
+    else: 
+        title_text = "No title"
+    return title_text 
 
 def check_links(robot_url, url, max_depth):
     rp = RobotFileParser()
@@ -43,12 +51,7 @@ def check_links(robot_url, url, max_depth):
             res = requests.get(current_url)
             soup = BeautifulSoup(res.text, "html.parser")
 
-            title = soup.find('title')
-            title_text = ""
-            if title:
-                title_text = title.get_text() 
-            else: 
-                title_text = "No title"
+            title_text = get_title(soup)
             visited_links.append((current_url, title_text))
 
             for url in soup.findAll('a'):
