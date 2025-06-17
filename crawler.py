@@ -4,79 +4,86 @@ from urllib.parse import urljoin
 from urllib.robotparser import RobotFileParser
 
 
-def crawl(robot_url, url_to_crawl, max_depth):
-    return check_links(robot_url, url_to_crawl, max_depth)
+class Crawl():
 
-def ask_robots_permission(rp, url_to_crawl):
-    return rp.can_fetch("*", url_to_crawl)
-            
-def get_title(soup):
-    title = soup.find('title')
-    title_text = ""
-    if title:
-        title_text = title.get_text() 
-    else: 
-        title_text = "No title"
-    return title_text 
+    def __init__(self, robot_url, start_url, max_depth):
+        self.robot_url = robot_url
+        self.start_url = start_url
+        self.max_depth = max_depth
+    
 
+    def run(self):
+        rp = RobotFileParser()
+        rp.set_url(self.robot_url)
+        rp.read()
+        visited_links = []
+        urls_to_visit = [(self.start_url, 0)]
+        while len(urls_to_visit) and len(visited_links) < 10:
+            current_url, depth = urls_to_visit.pop(0)
 
-def check_if_already_visited(current_url, visited_links):
-    return any(link == current_url for link in visited_links)
-
-def extract_links(soup, current_url):
-    links = []
-    for url in soup.findAll('a'):
-        href = url.get("href")
-        if href and not href.startswith(("mailto:", "javascript:", "#")):
-            full_url = urljoin(current_url, href)
-            links.append(full_url)
-    return links
-
-def check_links(robot_url, url, max_depth):
-    rp = RobotFileParser()
-    rp.set_url(robot_url)
-    rp.read()
-    visited_links = []
-    urls_to_visit = [(url, 0)]
-    while len(urls_to_visit) and len(visited_links) < 10:
-        current_url, depth = urls_to_visit.pop(0)
-
-        if depth > max_depth:
-            break
+            if depth > self.max_depth:
+                break
         
-        if check_if_already_visited(current_url, visited_links):
-            continue
+            if self._check_if_already_visited(current_url, visited_links):
+                continue
 
-        if not ask_robots_permission(rp, current_url):
-            print(f"Blocked by robots.txt: {current_url}")
-            continue
+            if not self._ask_robots_permission(rp, current_url):
+                print(f"Blocked by robots.txt: {current_url}")
+                continue
 
-        print(f"Visiting: {current_url}")
+            print(f"Visiting: {current_url}")
 
-        try:
-            res = requests.get(current_url)
-            soup = BeautifulSoup(res.text, "html.parser")
+            try:
+                res = requests.get(current_url)
+                soup = BeautifulSoup(res.text, "html.parser")
 
-            title_text = get_title(soup)
-            visited_links.append((current_url, title_text))
+                title_text = self._get_title(soup)
+                visited_links.append((current_url, title_text))
 
-            links = extract_links(soup, current_url)
-            for link in links:
-                if link not in visited_links and link not in urls_to_visit:
-                    urls_to_visit.append((link, depth + 1))
+                links = self._extract_links(soup, current_url)
+                for link in links:
+                    if link not in visited_links and link not in urls_to_visit:
+                        urls_to_visit.append((link, depth + 1))
                         
 
-        except Exception as e:
-            print(f"Error fetching {current_url}: {e}")
+            except Exception as e:
+                print(f"Error fetching {current_url}: {e}")
     
-    print("\nCrawler job complete. All links that were visited:")
-    for link, title in visited_links:
-        print(f"Visited URL: {link} \nTitle: {title}")
+        print("\nCrawler job complete. All links that were visited:")
+        for link, title in visited_links:
+            print(f"Visited URL: {link} \nTitle: {title}")
     
-    return visited_links
-
-print(crawl(robot_url="https://developer.mozilla.org/robots.txt", url_to_crawl="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a", max_depth=3))
+        return visited_links
 
 
-        
+
+    def _ask_robots_permission(self, rp, url_to_crawl):
+        return rp.can_fetch("*", url_to_crawl)
+            
+    def _get_title(self, soup):
+        title = soup.find('title')
+        title_text = ""
+        if title:
+            title_text = title.get_text() 
+        else: 
+            title_text = "No title"
+        return title_text 
+
+
+    def _check_if_already_visited(self, current_url, visited_links):
+        return any(link == current_url for link in visited_links)
+
+    def _extract_links(self, soup, current_url):
+        links = []
+        for url in soup.findAll('a'):
+            href = url.get("href")
+            if href and not href.startswith(("mailto:", "javascript:", "#")):
+                full_url = urljoin(current_url, href)
+                links.append(full_url)
+        return links
+
+crawler = Crawl(robot_url="https://developer.mozilla.org/robots.txt", start_url="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a", max_depth=3)
+crawler.run()
+
+
         
