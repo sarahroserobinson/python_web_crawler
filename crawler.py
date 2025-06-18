@@ -6,10 +6,11 @@ from urllib.robotparser import RobotFileParser
 
 class Crawl():
 
-    def __init__(self, robot_url, start_url, max_depth):
+    def __init__(self, robot_url, start_url, max_depth, format):
         self.robot_url = robot_url
         self.start_url = start_url
         self.max_depth = max_depth
+        self.format = format
     
 
     def run(self):
@@ -53,8 +54,12 @@ class Crawl():
         for link, title in visited_links:
             print(f"Visited URL: {link} \nTitle: {title}")
         
-        self.export_as_csv("visited_links.csv", visited_links)
-        self.export_as_json("visited_links.json", visited_links)
+        if self.format == 'csv':
+            self.export_as_csv("visited_links.csv", visited_links)
+        elif self.format == 'json':
+            self.export_as_json("visited_links.json", visited_links)
+        else:
+            print("Unable to save to that format, please select either json or csv.")
         return visited_links
 
 
@@ -95,7 +100,7 @@ class Crawl():
         print(f"Data has been imported to a json file named {filename}")
 
 
-crawler = Crawl(robot_url="https://developer.mozilla.org/robots.txt", start_url="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a", max_depth=3)
+crawler = Crawl(robot_url="https://developer.mozilla.org/robots.txt", start_url="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a", max_depth=3, format="csv")
 crawler.run()
 
 
