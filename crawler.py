@@ -1,4 +1,4 @@
-import requests, csv
+import requests, csv, json
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from urllib.robotparser import RobotFileParser
@@ -53,8 +53,8 @@ class Crawl():
         for link, title in visited_links:
             print(f"Visited URL: {link} \nTitle: {title}")
         
-        self.export_as_csv("visited_links_csv.csv", visited_links)
-    
+        self.export_as_csv("visited_links.csv", visited_links)
+        self.export_as_json("visited_links.json", visited_links)
         return visited_links
 
 
@@ -87,7 +87,13 @@ class Crawl():
         with open(filename, 'w') as file:
             writer = csv.writer(file)
             writer.writerows(data)
-        return f"Data has been imported to a csv file named {filename}"
+        print(f"Data has been imported to a csv file named {filename}")
+    
+    def export_as_json(self, filename, data):
+        with open(filename, 'w') as file:
+            json.dump(data, file)
+        print(f"Data has been imported to a json file named {filename}")
+
 
 crawler = Crawl(robot_url="https://developer.mozilla.org/robots.txt", start_url="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a", max_depth=3)
 crawler.run()
