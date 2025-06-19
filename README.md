@@ -35,6 +35,7 @@ crawler = Crawl(
 )
 
 crawler.run()
+```
 
 ### Features
 - Respects robots.txt rules
