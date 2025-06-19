@@ -1,6 +1,6 @@
-import requests, csv, json
+import requests, csv, json, datetime
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 
 
@@ -55,9 +55,9 @@ class Crawl():
             print(f"Visited URL: {link} \nTitle: {title}")
         
         if self.format == 'csv':
-            self.export_as_csv("visited_links.csv", visited_links)
+            self.export_as_csv(visited_links)
         elif self.format == 'json':
-            self.export_as_json("visited_links.json", visited_links)
+            self.export_as_json(visited_links)
         else:
             print("Unable to save to that format, please select either json or csv.")
         return visited_links
@@ -88,13 +88,24 @@ class Crawl():
                 links.append(full_url)
         return links
     
-    def export_as_csv(self, filename, data):
+    def create_filename(self):
+        parsed_url = urlparse(self.start_url)
+        domain = parsed_url.netloc.replace('.', '_')
+        todays_date = datetime.datetime.now().date()
+        filename = f"{domain}_{todays_date}.{self.format}"
+        return filename
+    
+
+
+    def export_as_csv(self, data):
+        filename = self.create_filename()
         with open(filename, 'w') as file:
             writer = csv.writer(file)
             writer.writerows(data)
         print(f"Data has been imported to a csv file named {filename}")
     
-    def export_as_json(self, filename, data):
+    def export_as_json(self, data):
+        filename = self.create_filename()
         with open(filename, 'w') as file:
             json.dump(data, file)
         print(f"Data has been imported to a json file named {filename}")
