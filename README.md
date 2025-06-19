@@ -23,8 +23,10 @@ Install dependencies (if needed):
 
 ```bash
 pip install requests beautifulsoup4
+```
 
 ### How to Run
+```
 from crawler import Crawl
 
 crawler = Crawl(
