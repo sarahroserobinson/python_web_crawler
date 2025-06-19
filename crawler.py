@@ -54,12 +54,7 @@ class Crawl():
         for link, title in visited_links:
             print(f"Visited URL: {link} \nTitle: {title}")
         
-        if self.format == 'csv':
-            self.export_as_csv(visited_links)
-        elif self.format == 'json':
-            self.export_as_json(visited_links)
-        else:
-            print("Unable to save to that format, please select either json or csv.")
+        self.export_as_file(visited_links)
         return visited_links
 
 
@@ -90,25 +85,23 @@ class Crawl():
     
     def create_filename(self):
         parsed_url = urlparse(self.start_url)
-        domain = parsed_url.netloc.replace('.', '_')
+        domain = parsed_url.netloc.replace('.', '-')
         todays_date = datetime.datetime.now().date()
-        filename = f"{domain}_{todays_date}.{self.format}"
+        filename = f"{domain}-{todays_date}.{self.format}"
         return filename
     
-
-
-    def export_as_csv(self, data):
+    def export_as_file(self, data):
         filename = self.create_filename()
         with open(filename, 'w') as file:
-            writer = csv.writer(file)
-            writer.writerows(data)
-        print(f"Data has been imported to a csv file named {filename}")
-    
-    def export_as_json(self, data):
-        filename = self.create_filename()
-        with open(filename, 'w') as file:
-            json.dump(data, file)
-        print(f"Data has been imported to a json file named {filename}")
+            if self.format == 'csv':
+                writer = csv.writer(file)
+                writer.writerows(data)
+            elif self.format == 'json':
+                json.dump(data, file)
+            else:
+                print("Unable to save to that format, please select either json or csv.")
+        print(f"Data has been imported to a {self.format} file named {filename}")
+
 
 
 crawler = Crawl(robot_url="https://developer.mozilla.org/robots.txt", start_url="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a", max_depth=3, format="csv")
