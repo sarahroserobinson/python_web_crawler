@@ -5,11 +5,11 @@ from urllib.robotparser import RobotFileParser
 
 
 class Crawl():
-
-    def __init__(self, robot_url, start_url, max_depth, format):
+    def __init__(self, robot_url, start_url, max_depth, crawl_limit, format):
         self.robot_url = robot_url
         self.start_url = start_url
         self.max_depth = max_depth
+        self.crawl_limit = crawl_limit
         self.format = format
     
 
@@ -19,7 +19,8 @@ class Crawl():
         rp.read()
         visited_links = []
         urls_to_visit = [(self.start_url, 0)]
-        while len(urls_to_visit) and len(visited_links) < 10:
+
+        while len(urls_to_visit) and len(visited_links) < self.crawl_limit:
             current_url, depth = urls_to_visit.pop(0)
 
             if depth > self.max_depth:
@@ -105,7 +106,7 @@ class Crawl():
 
 
 
-crawler = Crawl(robot_url="https://developer.mozilla.org/robots.txt", start_url="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a", max_depth=3, format="csv")
+crawler = Crawl(robot_url="https://developer.mozilla.org/robots.txt", start_url="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a", max_depth=3, crawl_limit=10, format="csv")
 crawler.run()
 
 
