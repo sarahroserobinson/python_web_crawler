@@ -1,4 +1,4 @@
-import requests, csv, json, datetime
+import requests, csv, json, datetime, time
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
@@ -35,6 +35,7 @@ class Crawl():
             print(f"Visiting: {current_url}")
 
             try:
+                time.sleep(1)
                 res = requests.get(current_url)
                 soup = BeautifulSoup(res.text, "html.parser")
 
